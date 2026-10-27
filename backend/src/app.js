@@ -1,0 +1,22 @@
+import express from 'express';
+import cors from 'cors';
+import { config } from './config.js';
+import auth from './routes/auth.js';
+import items from './routes/items.js';
+import outfits from './routes/outfits.js';
+import stylist from './routes/stylist.js';
+import analytics from './routes/analytics.js';
+export const app = express();
+app.use(cors());
+app.use(express.json({ limit: '1mb' }));
+app.use('/uploads', express.static(config.uploadDir));
+app.get('/api/health', (req, res) => res.json({ ok: true }));
+app.use('/api/auth', auth);
+app.use('/api/items', items);
+app.use('/api/outfits', outfits);
+app.use('/api/stylist', stylist);
+app.use('/api', analytics);
+app.use((err, req, res, next) => { // eslint-disable-line
+  console.error(err);
+  res.status(err.status || (err.name === 'MulterError' || /Only JPG/.test(err.message) ? 400 : 500)).json({ error: err.message || 'Server error' });
+});
